@@ -1,0 +1,16 @@
+INFO  18:55:32,722 - Compiling source file: /home/bogdan/Documents/PP1/pp1domaci/workspace/MJCompilerDomaci/test/program.mj
+INFO  18:55:32,729 - #1 program
+INFO  18:55:32,729 - #4 MJProgram
+INFO  18:55:32,729 - #4 int
+INFO  18:55:32,729 - #4 x
+INFO  18:55:32,729 - #8 ,
+INFO  18:55:32,729 - #4 y
+INFO  18:55:32,729 - #9 ;
+INFO  18:55:32,729 - #12 {
+INFO  18:55:32,729 - #15 void
+INFO  18:55:32,730 - #4 main
+INFO  18:55:32,730 - #10 (
+INFO  18:55:32,730 - #11 )
+INFO  18:55:32,730 - #12 {
+INFO  18:55:32,730 - #13 }
+INFO  18:55:32,730 - #13 }

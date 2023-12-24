@@ -1,0 +1,124 @@
+package rs.ac.bg.etf.pp1;
+
+import java_cup.runtime.*;
+import org.apache.log4j.*;
+import rs.ac.bg.etf.pp1.ast.*;
+
+parser code {:
+
+	Logger log = Logger.getLogger(getClass());
+   
+   
+    // slede redefinisani metodi za prijavu gresaka radi izmene teksta poruke
+     
+    public void report_fatal_error(String message, Object info) throws java.lang.Exception {
+      done_parsing();
+      report_error(message, info);
+    }
+  
+    public void syntax_error(Symbol cur_token) {
+        report_error("\nSintaksna greska", cur_token);
+    }
+  
+    public void unrecovered_syntax_error(Symbol cur_token) throws java.lang.Exception {
+        report_fatal_error("Fatalna greska, parsiranje se ne moze nastaviti", cur_token);
+    }
+
+    public void report_error(String message, Object info) {
+    	StringBuilder msg = new StringBuilder(message); 
+    	if (info instanceof Symbol)
+            msg.append (" na liniji ").append(((Symbol)info).left);
+        log.error(msg.toString());
+    }
+
+
+:}
+
+
+scan with {:
+	Symbol s = this.getScanner().next_token();
+	if (s != null && s.value != null) 
+		log.info(s.toString() + " " + s.value.toString());
+	return s;
+:}
+
+terminal PROG, LBRACE, RBRACE, SEMI, LPAREN, RPAREN, RETURN, EQUAL, COMMA, PLUS, PRINT;
+terminal CHARCONST, FINAL, LSQUARE, RSQUARE, TIMES, MINUS, VOID, NEW, DIV, CLASS;
+terminal Integer NUMBER;
+terminal String IDENT;
+
+nonterminal Program, VarDeclList, MethodDeclList, MethodDecl, VarDecl, Type;
+nonterminal FormPars, StatementList, FormalParamList, FormalParamDecl, Statement;
+nonterminal Expr, Designator, Term, Addop, Factor, ActualPars, ActualParamList; 
+
+
+
+Program ::= (Program) PROG IDENT VarDeclList LBRACE MethodDeclList RBRACE;
+
+VarDeclList ::= (VarDeclarations) VarDeclList VarDecl
+			|
+			(NoVarDecl) /* epsilon */
+			;
+
+VarDecl ::= (VarDecl) Type:varType IDENT:varName SEMI;
+
+Type ::= (Type) Type:varType IDENT:varName SEMI;
+
+MethodDeclList ::= (MethodDeclarations) MethodDeclList MethodDecl
+				|
+				(NoMethodDecl) /* epsilon */
+				;
+		
+MethodDecl ::= (MethodDecl) Type:retType IDENT:methName LPAREN FormPars RPAREN VarDeclList LBRACE StatementList RBRACE;
+
+FormPars ::= (FormParams) FormalParamList
+		 |
+		 (NoFormParam) /* epsilon */
+		 ;
+		 
+FormalParamList ::= (FormalParemDecls) FormalParamList COMMA FormalParamDecl
+				|
+				(SingleFormalParamDecl) FormalParamDecl
+				;
+				
+StatementList ::= (Statements) StatementList Statement
+				|
+				(NoStatements) /* epsilon */
+				;
+				
+Statement ::= (Assignment) Designator:dest EQUAL Expr:e SEMI
+		   |
+		   (PrintStmt) PRINT LPAREN Expr RPAREN SEMI
+		   |
+		   (ReturnExpr) RETURN Expr:t SEMI
+		   |
+		   (ReturnNoExpr) RETURN SEMI
+		   ;
+		   
+Expr ::= (AddExpr) Expr:te Addop Term
+	 |
+	 (TermExpr) Term:t
+	 ; 		   
+	 
+Term ::= (Term) Factor:t ;
+
+Factor ::= (Var) Designator:d
+	   |
+	   (FuncCall) Designator:func LPAREN ActualPars RPAREN
+	   |
+	   (Const) NUMBER
+	   ;	
+	   
+ActualPars ::= (Actuals) ActualParamList
+			|
+			(NoActuals) /* epsilon */
+			;
+			
+ActualParamList ::= (ActualParams) ActualParamList COMMA Expr
+				|
+				(ActualParam) Expr
+				;
+				
+Designator ::= (Designator) IDENT:name;
+
+Addop ::= (Addop) PLUS;
